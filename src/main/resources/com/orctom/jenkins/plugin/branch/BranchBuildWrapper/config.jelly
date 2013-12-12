@@ -1,0 +1,16 @@
+<j:jelly xmlns:j="jelly:core"
+         xmlns:f="/lib/form">
+
+    <f:advanced>
+        <f:entry title="Release environment variable">
+            <f:textbox field="releaseEnvVar"
+                       value="${h.defaulted(instance.releaseEnvVar,descriptor.DEFAULT_RELEASE_ENVVAR)}"/>
+        </f:entry>
+        <f:entry title="SCM username environment variable">
+            <f:textbox field="scmUserEnvVar" value="${instance.scmUserEnvVar}"/>
+        </f:entry>
+        <f:entry title="SCM password environment variable">
+            <f:textbox field="scmPasswordEnvVar" value="${instance.scmPasswordEnvVar}"/>
+        </f:entry>
+    </f:advanced>
+</j:jelly>
