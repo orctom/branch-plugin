@@ -6,17 +6,12 @@
 					<f:entry title="Branch Version">
 						<f:textbox name="branchVersion" value="${it.computeBranchVersion()}" />
 					</f:entry>
+					<f:entry title="Next Trunk Version">
+						<f:textbox name="trunkVersion" value="${it.computeTrunkVersion()}" />
+					</f:entry>
 					<f:entry title="New Branch Job Name">
 						<f:textbox name="branchJobName" value="${it.computeBranchJobName()}" />
 					</f:entry>
-					<f:optionalBlock name="specifyScmCredentials" title="Specify SCM login/password">
-						<f:entry title="Username">
-							<f:textbox name="scmUsername" value="" />
-						</f:entry>
-						<f:entry title="Password">
-							<f:password name="scmPassword" value="" />
-						</f:entry>
-					</f:optionalBlock>
 				</f:section>
 
 				<j:if test="${!empty(it.parameterDefinitions)}">

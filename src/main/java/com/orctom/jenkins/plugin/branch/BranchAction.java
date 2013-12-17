@@ -2,10 +2,10 @@ package com.orctom.jenkins.plugin.branch;
 
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
+import hudson.model.Hudson;
 import hudson.model.PermalinkProjectAction;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.shared.release.versions.DefaultVersionInfo;
-import org.apache.maven.shared.release.versions.VersionParseException;
+import org.apache.maven.shared.release.versions.VersionInfo;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -23,6 +22,8 @@ import java.util.logging.Logger;
  */
 public class BranchAction implements PermalinkProjectAction {
 
+    private static Logger LOGGER = Logger.getLogger(BranchAction.class.getName());
+
     private MavenModuleSet project;
 
     public BranchAction(MavenModuleSet project) {
@@ -30,7 +31,7 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String getIconFileName() {
-        return "installer.gif";
+        return "/plugin/branch-plugin/img/branch.gif";
     }
 
     public String getDisplayName() {
@@ -54,37 +55,37 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String computeBranchVersion() {
-        String version = "NaN";
-        final MavenModule rootModule = getRootModule();
-        if (rootModule != null && StringUtils.isNotBlank(rootModule.getVersion())) {
-            try {
-                DefaultVersionInfo dvi = new DefaultVersionInfo(rootModule.getVersion());
-                version = dvi.getReleaseVersionString();
-            } catch (VersionParseException vpEx) {
-                Logger logger = Logger.getLogger(this.getClass().getName());
-                logger.log(Level.WARNING, "Failed to compute next version.", vpEx);
-                version = rootModule.getVersion().replace("-SNAPSHOT", "");
-            }
-        }
-        return version;
+        return getVersionComputer().getReleaseVersionString();
+    }
+
+    public String computeTrunkVersion() {
+        return getVersionComputer().getNextVersion().getSnapshotVersionString();
     }
 
     public String computeBranchJobName() {
+        String name = project.getName().replaceAll("(?i)TRUNK", "BRANCH");
+        String[] names = name.split("[^a-zA-Z']+");
+        return null;
+    }
+
+    private String getDefaultVersioningMode() {
+        BranchBuildWrapper buildWrapper = project.getBuildWrappersList().get(BranchBuildWrapper.class);
+        return buildWrapper.getDefaultVersioningMode();
+    }
+
+    private VersionInfo getVersionComputer() {
         String version = "NaN-SNAPSHOT";
         final MavenModule rootModule = getRootModule();
         if (rootModule != null && StringUtils.isNotBlank(rootModule.getVersion())) {
-            try {
-                DefaultVersionInfo dvi = new DefaultVersionInfo(rootModule.getVersion());
-                version = dvi.getNextVersion().getSnapshotVersionString();
-            } catch (Exception vpEx) {
-                Logger logger = Logger.getLogger(this.getClass().getName());
-                logger.log(Level.WARNING, "Failed to compute next version.", vpEx);
-            }
+            version = rootModule.getVersion();
         }
-        return version;
+        BranchBuildWrapper buildWrapper = project.getBuildWrappersList().get(BranchBuildWrapper.class);
+        String selectedVersionMode = buildWrapper.getDefaultVersioningMode();
+        return VersionComputerFactory.getVersionComputer(selectedVersionMode, version);
     }
 
     public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
-        System.out.println("submit and branching...");
+        Hudson.getInstance().checkPermission(Hudson.ADMINISTER);
+        BranchBuildWrapper wrapper = project.getBuildWrappersList().get(BranchBuildWrapper.class);
     }
 }
