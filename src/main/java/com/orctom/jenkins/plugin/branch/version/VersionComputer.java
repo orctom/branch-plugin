@@ -1,5 +1,6 @@
 package com.orctom.jenkins.plugin.branch.version;
 
+import org.apache.maven.shared.release.versions.DefaultVersionInfo;
 import org.apache.maven.shared.release.versions.VersionInfo;
 
 /**
@@ -8,8 +9,8 @@ import org.apache.maven.shared.release.versions.VersionInfo;
 
 public enum VersionComputer {
 
-    DEFAULT("DEFAULT", "Default", VersionInfo.class),
-    RC("RELEASE_CANDIDATE", "Release Candidate", RCVersionInfo.class),
+    DEFAULT("DEFAULT", "Default", DefaultVersionInfo.class),
+    RELEASE_CANDIDATE("RELEASE_CANDIDATE", "Release Candidate", RCVersionInfo.class),
     MONTHLY("MONTHLY", "Ubuntu like Monthly", MonthlyVersionInfo.class),
     MONTHLY_WITH_JOB_ID("MONTHLY_WITH_JOB_ID", "Ubuntu like Monthly with Job Name/ID", MonthlyWithJobIDVersionInfo.class);
 

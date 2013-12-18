@@ -2,7 +2,7 @@
 	<l:layout norefresh="true">
 		<l:main-panel>
 			<f:form method="post" action="submit">
-				<f:section title="Perform Maven Release">
+				<f:section title="Create a New Branch">
 					<f:entry title="Branch Version">
 						<f:textbox name="branchVersion" value="${it.computeBranchVersion()}" />
 					</f:entry>
@@ -22,7 +22,12 @@
 				        </tbody>
 				      </j:forEach>
 				   </f:section>
-				</j:if>	
+				</j:if>
+                <f:advanced>
+                    <f:entry title="Branch base path">
+                        <f:textbox field="branchBasePath" value="${it.branchBasePath}"/>
+                    </f:entry>
+                </f:advanced>
 				
 				<tr><td colspan="4" align="right"><f:submit value="${%Schedule Maven Branch Build}"/></td></tr>
 			</f:form>

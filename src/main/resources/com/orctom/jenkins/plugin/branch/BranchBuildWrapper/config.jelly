@@ -7,7 +7,7 @@
 
     <f:entry title="Default versioning mode">
         <select name="defaultVersioningMode">
-            <j:forEach items="${instance.versioningModes}" var="mode">
+            <j:forEach items="${descriptor.versioningModes}" var="mode">
                 <f:option value="${mode.name}" selected="${mode.name == h.defaulted(instance.defaultVersioningMode, 'DEFAULT')}">
                     ${mode.description}
                 </f:option>

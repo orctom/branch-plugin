@@ -87,19 +87,10 @@ public class BranchBuildWrapper extends BuildWrapper {
         return defaultVersioningMode;
     }
 
-    public List<VersionComputer> getVersioningModes() {
-        return new ArrayList<VersionComputer>(Arrays.asList(VersionComputer.values()));
-    }
-
     @Extension
     public static class DescriptorImpl extends BuildWrapperDescriptor {
 
         private String numberOfBranchBuildsToKeep = "2";
-
-        public static final String VERSIONING_INCREASE_MAJOR = "VERSIONING_INCREACE_MAJOR";
-        public static final String VERSIONING_INCREASE_MINOR = "VERSIONING_INCREACE_MINOR";
-        public static final String VERSIONING_INCREASE_MICRO = "VERSIONING_INCREACE_MICRO";
-        public static final String VERSIONING_INCREASE_DATE_MONTHLY = "VERSIONING_INCREACE_DATE_MONTHLY";
 
         public DescriptorImpl() {
             super(BranchBuildWrapper.class);
@@ -125,6 +116,10 @@ public class BranchBuildWrapper extends BuildWrapper {
 
         public String getNumberOfBranchBuildsToKeep() {
             return numberOfBranchBuildsToKeep;
+        }
+
+        public List<VersionComputer> getVersioningModes() {
+            return new ArrayList<VersionComputer>(Arrays.asList(VersionComputer.values()));
         }
     }
 }

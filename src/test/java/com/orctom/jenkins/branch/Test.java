@@ -5,7 +5,7 @@ package com.orctom.jenkins.branch;
  */
 public class Test {
     public static void main(String[] args) {
-        String name = "WWW-trunk_20234234";
-        System.out.println(name.replaceAll("(?i)TRUNK", "BRANCH").replaceAll("\d"));
+        String name = "BARZAARVOICE_TRUNK";
+        System.out.println(name.replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d)", ""));
     }
 }
