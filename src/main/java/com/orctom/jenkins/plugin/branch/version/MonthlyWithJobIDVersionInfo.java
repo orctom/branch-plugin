@@ -1,16 +1,17 @@
 package com.orctom.jenkins.plugin.branch.version;
 
-import org.apache.maven.shared.release.versions.DefaultVersionInfo;
 import org.apache.maven.shared.release.versions.VersionInfo;
 import org.apache.maven.shared.release.versions.VersionParseException;
+
+import java.util.Date;
 
 /**
  * Created by CH on 12/17/13.
  */
-public class MonthlyWithJobIDVersionInfo extends DefaultVersionInfo {
+public class MonthlyWithJobIDVersionInfo extends MonthlyVersionInfo {
 
-    public MonthlyWithJobIDVersionInfo(String version) throws VersionParseException {
-        super(version);
+    public MonthlyWithJobIDVersionInfo(String version, String jobName) throws VersionParseException {
+        super(version, jobName);
     }
 
     @Override
@@ -30,6 +31,6 @@ public class MonthlyWithJobIDVersionInfo extends DefaultVersionInfo {
 
     @Override
     public String getReleaseVersionString() {
-        return super.getReleaseVersionString();
+        return releaseVersionFormatter.format(new Date()) + "-" + jobName.replaceAll("\\_.*", "") + "-SNAPSHOT";
     }
 }

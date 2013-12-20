@@ -5,7 +5,9 @@ package com.orctom.jenkins.branch;
  */
 public class Test {
     public static void main(String[] args) {
-        String name = "BARZAARVOICE_TRUNK";
-        System.out.println(name.replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d)", ""));
+        System.out.println("IOD_TRUNK".replaceAll("\\_.*", ""));
+        System.out.println("WWW_TRUNK".replaceAll("\\_.*", ""));
+        System.out.println("BSD_BRANCH".replaceAll("\\_.*", ""));
+        System.out.println("VKG".replaceAll("\\_.*", ""));
     }
 }

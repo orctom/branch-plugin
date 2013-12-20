@@ -1,11 +1,13 @@
 package com.orctom.jenkins.plugin.branch;
 
 import com.orctom.jenkins.plugin.branch.version.VersionComputer;
+import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
 import hudson.model.Hudson;
 import hudson.model.PermalinkProjectAction;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.shared.release.versions.VersionInfo;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -58,9 +60,18 @@ public class BranchAction implements PermalinkProjectAction {
         return project.getRootModule();
     }
 
+    public String getCurrentVersion() {
+        final MavenModule rootModule = getRootModule();
+        if (rootModule != null && StringUtils.isNotBlank(rootModule.getVersion())) {
+            return rootModule.getVersion();
+        } else {
+            return null;
+        }
+    }
+
     public String computeBranchVersion() {
         String branchVersion = getVersionComputer().getReleaseVersionString();
-        if (branchVersion.endsWith("-SNAPSHOT")) {
+        if (branchVersion.endsWith(Artifact.SNAPSHOT_VERSION)) {
             return branchVersion;
         } else {
             return branchVersion + "-SNAPSHOT";
@@ -78,18 +89,45 @@ public class BranchAction implements PermalinkProjectAction {
 
     public String computeBranchJobName() {
         String selectedVersionMode = getDefaultVersioningMode();
-        String name = project.getName().replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d)", "");
+
+        StringBuilder jobName = new StringBuilder(50);
+        jobName.append(project.getName().replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d)", ""));
+
         if (VersionComputer.RELEASE_CANDIDATE.getName().equals(selectedVersionMode)) {
-            final MavenModule rootModule = getRootModule();
-            if (rootModule != null && StringUtils.isNotBlank(rootModule.getVersion())) {
-                String version = rootModule.getVersion();
-                name += version.replaceAll("-SNAPSHOT", "RC-SNAPSHOT");
+            String version = getCurrentVersion();
+            if (null != version) {
+                jobName.append("_").append(version.replaceAll("-SNAPSHOT", ""));
             }
         } else {
             String dateString = df.format(new Date());
-            name += "_" + dateString;
+            jobName.append("_").append(dateString);
         }
-        return name;
+
+        return jobName.toString();
+    }
+
+    public String computeBranchURL() {
+        StringBuilder url = new StringBuilder(100);
+        url.append(project.getBuildWrappersList().get(BranchBuildWrapper.class).getBranchBasePath());
+
+        if ('/' != url.charAt(url.length() - 1)) {
+            url.append("/");
+        }
+
+        String selectedVersionMode = getDefaultVersioningMode();
+
+        if (VersionComputer.RELEASE_CANDIDATE.getName().equals(selectedVersionMode)) {
+            final MavenModule rootModule = getRootModule();
+            String version = getCurrentVersion();
+            if (null != version) {
+                url.append(version.replaceAll("-SNAPSHOT", ""));
+            }
+        } else {
+            String dateString = df.format(new Date());
+            url.append(dateString).append("/");
+        }
+
+        return url.toString();
     }
 
     private String getDefaultVersioningMode() {
@@ -98,17 +136,14 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     private VersionInfo getVersionComputer() {
-        String version = "NaN-SNAPSHOT";
+        String currentVersion = "NaN-SNAPSHOT";
         final MavenModule rootModule = getRootModule();
         if (rootModule != null && StringUtils.isNotBlank(rootModule.getVersion())) {
-            version = rootModule.getVersion();
+            currentVersion = rootModule.getVersion();
         }
         String selectedVersionMode = getDefaultVersioningMode();
-        return VersionComputerFactory.getVersionComputer(selectedVersionMode, version);
-    }
 
-    public String getBranchBasePath() {
-        return project.getBuildWrappersList().get(BranchBuildWrapper.class).getBranchBasePath();
+        return VersionComputerFactory.getVersionComputer(selectedVersionMode, currentVersion, project.getName());
     }
 
     public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {

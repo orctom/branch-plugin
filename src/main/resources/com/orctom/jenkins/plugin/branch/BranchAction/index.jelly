@@ -3,7 +3,10 @@
 		<l:main-panel>
 			<f:form method="post" action="submit">
 				<f:section title="Create a New Branch">
-					<f:entry title="Branch Version">
+                    <f:entry title="Current Version">
+						<f:readOnlyTextbox name="currentVersion" value="${it.getCurrentVersion()}" />
+					</f:entry>
+                    <f:entry title="Branch Version">
 						<f:textbox name="branchVersion" value="${it.computeBranchVersion()}" />
 					</f:entry>
 					<f:entry title="Next Trunk Version">
@@ -23,12 +26,9 @@
 				      </j:forEach>
 				   </f:section>
 				</j:if>
-                <f:advanced>
-                    <f:entry title="Branch base path">
-                        <f:textbox field="branchBasePath" value="${it.branchBasePath}"/>
-                    </f:entry>
-                </f:advanced>
-				
+                <f:entry title="Branch base path">
+                    <f:textbox field="branchURL" value="${it.computeBranchURL()}"/>
+                </f:entry>
 				<tr><td colspan="4" align="right"><f:submit value="${%Schedule Maven Branch Build}"/></td></tr>
 			</f:form>
 		</l:main-panel>

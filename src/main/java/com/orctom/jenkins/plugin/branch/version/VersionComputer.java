@@ -1,6 +1,5 @@
 package com.orctom.jenkins.plugin.branch.version;
 
-import org.apache.maven.shared.release.versions.DefaultVersionInfo;
 import org.apache.maven.shared.release.versions.VersionInfo;
 
 /**
