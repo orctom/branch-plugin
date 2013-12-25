@@ -1,6 +1,6 @@
 package com.orctom.jenkins.plugin.branch;
 
-import com.orctom.jenkins.plugin.branch.job.CreateBranchJobBuilder;
+import com.orctom.jenkins.plugin.branch.builder.CreateBranchJobBuilder;
 import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 import hudson.Extension;
 import hudson.Launcher;

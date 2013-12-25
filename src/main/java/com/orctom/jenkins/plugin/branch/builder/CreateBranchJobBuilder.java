@@ -1,4 +1,4 @@
-package com.orctom.jenkins.plugin.branch.job;
+package com.orctom.jenkins.plugin.branch.builder;
 
 import hudson.EnvVars;
 import hudson.Launcher;
