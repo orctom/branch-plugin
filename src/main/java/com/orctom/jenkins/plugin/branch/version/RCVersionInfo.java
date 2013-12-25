@@ -31,11 +31,17 @@ public class RCVersionInfo extends DefaultVersionInfo {
             if (StringUtils.isNumeric(annotationRevision)) {
                 annotationRevision = incrementVersionString(annotationRevision);
             } else {
-                int index = digits.size() - 2;
-                if (index >= 0) {
-                    digits.set( index, incrementVersionString( (String) digits.get( index ) ) );
+                if (1 == digits.size()) {
+                    digits.add("0");
                 }
-                digits.set( digits.size() - 1, "0");
+
+                digits.set(1, incrementVersionString((String) digits.get(1)));
+
+                if (digits.size() > 2) {
+                    for (int i = 2; i < digits.size() - 1; i++) {
+                        digits.set(i, "0");
+                    }
+                }
             }
 
             version = new DefaultVersionInfo(digits, annotation, annotationRevision, buildSpecifier, annotationSeparator, annotationRevSeparator, buildSeparator);

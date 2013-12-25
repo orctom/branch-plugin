@@ -1,0 +1,3 @@
+<j:jelly xmlns:j="jelly:core">
+    <img width="16" height="16" title="${it.tooltip}" src="${rootURL}/plugin/branch-plugin/img/branch.gif"/>
+</j:jelly>

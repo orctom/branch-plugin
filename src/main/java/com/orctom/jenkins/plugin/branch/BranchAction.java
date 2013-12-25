@@ -4,8 +4,7 @@ import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
-import hudson.model.Hudson;
-import hudson.model.PermalinkProjectAction;
+import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.shared.release.versions.VersionInfo;
@@ -15,10 +14,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -68,6 +64,9 @@ public class BranchAction implements PermalinkProjectAction {
             return null;
         }
     }
+    public String getBranchBase() {
+        return project.getBuildWrappersList().get(BranchBuildWrapper.class).getBranchBasePath();
+    }
 
     public String computeBranchVersion() {
         String branchVersion = getVersionComputer().getReleaseVersionString();
@@ -106,28 +105,18 @@ public class BranchAction implements PermalinkProjectAction {
         return jobName.toString();
     }
 
-    public String computeBranchURL() {
-        StringBuilder url = new StringBuilder(100);
-        url.append(project.getBuildWrappersList().get(BranchBuildWrapper.class).getBranchBasePath());
-
-        if ('/' != url.charAt(url.length() - 1)) {
-            url.append("/");
-        }
-
+    public String computeBranchName() {
         String selectedVersionMode = getDefaultVersioningMode();
 
         if (VersionComputer.RELEASE_CANDIDATE.getName().equals(selectedVersionMode)) {
             final MavenModule rootModule = getRootModule();
             String version = getCurrentVersion();
             if (null != version) {
-                url.append(version.replaceAll("-SNAPSHOT", ""));
+                return version.replaceAll("-SNAPSHOT", "");
             }
-        } else {
-            String dateString = df.format(new Date());
-            url.append(dateString).append("/");
         }
 
-        return url.toString();
+        return df.format(new Date());
     }
 
     private String getDefaultVersioningMode() {
@@ -149,6 +138,35 @@ public class BranchAction implements PermalinkProjectAction {
     public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
         Hudson.getInstance().checkPermission(Hudson.ADMINISTER);
         BranchBuildWrapper wrapper = project.getBuildWrappersList().get(BranchBuildWrapper.class);
-    }
 
+        final String branchVersion = req.getParameter("branchVersion");
+        final String trunkVersion = req.getParameter("trunkVersion");
+        final String branchJobName = req.getParameter("branchJobName");
+        final String branchBase = req.getParameter("branchBase");
+        final String branchName = req.getParameter("branchName");
+        final String trunkJobName = project.getName();
+
+        BranchArgumentsAction args = new BranchArgumentsAction();
+        args.setBranchVersion(branchVersion);
+        args.setTrunkVersion(trunkVersion);
+        args.setBranchJobName(branchJobName);
+        args.setBranchBase(branchBase);
+        args.setBranchName(branchName);
+        args.setTrunkJobName(trunkJobName);
+
+        List<ParameterValue> values = new ArrayList<ParameterValue>();
+        values.add(new StringParameterValue("branchVersion", branchVersion));
+        values.add(new StringParameterValue("trunkVersion", trunkVersion));
+        values.add(new StringParameterValue("branchJobName", branchJobName));
+        values.add(new StringParameterValue("branchBase", branchBase));
+        values.add(new StringParameterValue("branchName", branchName));
+        values.add(new StringParameterValue("trunkJobName", trunkJobName));
+        ParametersAction params = new ParametersAction(values);
+
+        if (project.scheduleBuild(0, new BranchCause(), params, args)) {
+            resp.sendRedirect(req.getContextPath() + '/' + project.getUrl());
+        } else {
+            resp.sendRedirect(req.getContextPath() + '/' + project.getUrl() + '/' + getUrlName() + "/failed");
+        }
+    }
 }
