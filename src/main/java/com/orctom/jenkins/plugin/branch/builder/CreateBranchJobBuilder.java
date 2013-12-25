@@ -103,9 +103,6 @@ public class CreateBranchJobBuilder extends Builder {
             listener.getLogger().println("Failed to transform the job config to point to branch SCM");
         }
 
-        LOGGER.info("branch xml:");
-        LOGGER.info(jobConfigXmlString);
-
         // Create the job copied to.
         listener.getLogger().println(String.format("Creating %s", branchJobNameExpanded));
         InputStream is = new ByteArrayInputStream(jobConfigXmlString.getBytes(encoding));
@@ -129,12 +126,11 @@ public class CreateBranchJobBuilder extends Builder {
         // update scm to point to branch
         NodeList locations = (NodeList) xpath.compile("//scm/locations/*/remote").evaluate(doc, XPathConstants.NODESET);
         int len = locations.getLength();
-        System.out.println(len);
         if (1 == len) {
             locations.item(0).setTextContent(branchURL);
         } else {
             boolean branchUrlEndWithSlash = branchURL.endsWith("/");
-            for (int i = 0; i < locations.getLength(); i++) {
+            for (int i = 0; i < len; i++) {
                 Node location = locations.item(i);
                 String value = location.getTextContent();
                 if (null != value && value.startsWith("http")) {
@@ -147,8 +143,8 @@ public class CreateBranchJobBuilder extends Builder {
             }
         }
 
+        // clear triggers
         if (isClearTriggers) {
-            // clear triggers
             Node triggerNode = (Node) xpath.compile("//triggers").evaluate(doc, XPathConstants.NODE);
             NodeList triggers = triggerNode.getChildNodes();
             if (triggers.getLength() > 0) {

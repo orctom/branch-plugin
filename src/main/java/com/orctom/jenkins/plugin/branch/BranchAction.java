@@ -1,21 +1,30 @@
 package com.orctom.jenkins.plugin.branch;
 
-import com.orctom.jenkins.plugin.branch.version.VersionComputer;
-import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
-import hudson.model.*;
+import hudson.model.ParameterValue;
+import hudson.model.Hudson;
+import hudson.model.ParametersAction;
+import hudson.model.PermalinkProjectAction;
+import hudson.model.StringParameterValue;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.shared.release.versions.VersionInfo;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.logging.Logger;
+import com.orctom.jenkins.plugin.branch.version.VersionComputer;
+import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
 
 /**
  * @author: CH
@@ -23,7 +32,6 @@ import java.util.logging.Logger;
  */
 public class BranchAction implements PermalinkProjectAction {
 
-    private static Logger LOGGER = Logger.getLogger(BranchAction.class.getName());
     private static SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 
     private MavenModuleSet project;
@@ -109,7 +117,6 @@ public class BranchAction implements PermalinkProjectAction {
         String selectedVersionMode = getDefaultVersioningMode();
 
         if (VersionComputer.RELEASE_CANDIDATE.getName().equals(selectedVersionMode)) {
-            final MavenModule rootModule = getRootModule();
             String version = getCurrentVersion();
             if (null != version) {
                 return version.replaceAll("-SNAPSHOT", "");

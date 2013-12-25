@@ -1,29 +1,34 @@
 package com.orctom.jenkins.plugin.branch;
 
-import com.orctom.jenkins.plugin.branch.builder.CreateBranchJobBuilder;
-import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.Util;
-import hudson.maven.*;
-import hudson.model.*;
+import hudson.maven.AbstractMavenProject;
+import hudson.maven.MavenModuleSet;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.RunList;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.orctom.jenkins.plugin.branch.builder.CreateBranchJobBuilder;
+import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 
 /**
  * Created by CH on 12/11/13.
  */
 public class BranchBuildWrapper extends BuildWrapper {
-
-    private static Logger LOGGER = Logger.getLogger(BranchBuildWrapper.class.getName());
 
     private String branchBasePath;
     private String defaultVersioningMode;
@@ -36,6 +41,7 @@ public class BranchBuildWrapper extends BuildWrapper {
         this.defaultVersioningMode = defaultVersioningMode;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Environment setUp(final AbstractBuild build, final Launcher launcher, final BuildListener listener) throws IOException, InterruptedException {
         if (!isBranchBuild(build)) {
@@ -71,45 +77,35 @@ public class BranchBuildWrapper extends BuildWrapper {
 
         return new Environment() {
 
-            @Override
-            public boolean tearDown(@SuppressWarnings("rawtypes") AbstractBuild bld, BuildListener lstnr)
-                    throws IOException, InterruptedException {
+			@Override
+            public boolean tearDown(AbstractBuild bld, BuildListener lstnr) throws IOException, InterruptedException {
                 boolean retVal = true;
-                final MavenModuleSet mmSet = getModuleSet(bld);
-                BranchArgumentsAction args = bld.getAction(BranchArgumentsAction.class);
 
                 int buildsKept = 0;
                 if (bld.getResult() != null && bld.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
-                    if (numberOfReleaseBuildsToKeep > 0 || numberOfReleaseBuildsToKeep == -1) {
-                        // keep this build.
-                        lstnr.getLogger().println("[Branch] assigning keep build to current build.");
-                        bld.keepLog();
-                        buildsKept++;
-                    }
+                    // keep this build.
+                    lstnr.getLogger().println("[Branch] keep this branch build.");
+                    bld.keepLog();
+                    buildsKept++;
 
                     // the value may have changed since a previous release so go searching...
                     for (Run run : (RunList<? extends Run>) (bld.getProject().getBuilds())) {
-                        LOGGER.info("checking build #{}" + run.getNumber());
-                        if (isSuccessfulReleaseBuild(run)) {
-                            LOGGER.info("build #{} was successful." + run.getNumber());
+                    	lstnr.getLogger().println(String.format("[Branch] checking build %s", run.getNumber()));
+                        if (isSuccessfulBranchBuild(run)) {
                             if (bld.getNumber() != run.getNumber()) { // not sure we still need this check..
                                 if (shouldKeepBuildNumber(numberOfReleaseBuildsToKeep, buildsKept)) {
                                     buildsKept++;
                                     if (!run.isKeepLog()) {
-                                        lstnr.getLogger().println(
-                                                "[Branch] assigning keep build to build " + run.getNumber());
+                                        lstnr.getLogger().println("[Branch] keep branch build: " + run.getNumber());
                                         run.keepLog(true);
                                     }
                                 } else {
                                     if (run.isKeepLog()) {
-                                        lstnr.getLogger().println(
-                                                "[Branch] removing keep build from build " + run.getNumber());
+                                        lstnr.getLogger().println("[Branch] removing keep branch build: " + run.getNumber());
                                         run.keepLog(false);
                                     }
                                 }
                             }
-                        } else {
-                            LOGGER.info("build #{} was NOT successful release build." + run.getNumber());
                         }
                     }
 
@@ -122,11 +118,11 @@ public class BranchBuildWrapper extends BuildWrapper {
             }
 
             /**
-             * evaluate if the specified build is a sucessful release build (not including dry runs)
+             * evaluate if the specified build is a successful release build (not including dry runs)
              * @param run the run to check
              * @return <code>true</code> if this is a successful release build that is not a dry run.
              */
-            private boolean isSuccessfulReleaseBuild(Run run) {
+            private boolean isSuccessfulBranchBuild(Run run) {
                 BranchBadgeAction a = run.getAction(BranchBadgeAction.class);
                 if (a != null && !run.isBuilding() && run.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
                     return true;
@@ -143,40 +139,21 @@ public class BranchBuildWrapper extends BuildWrapper {
         };
     }
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public Collection<? extends Action> getProjectActions(AbstractProject job) {
         final BranchAction branchAction = new BranchAction((MavenModuleSet) job);
         return Arrays.asList(branchAction);
     }
 
-    private boolean isBranchBuild(@SuppressWarnings("rawtypes") AbstractBuild build) {
+    @SuppressWarnings("unchecked")
+	private boolean isBranchBuild(@SuppressWarnings("rawtypes") AbstractBuild build) {
         return (build.getCause(BranchCause.class) != null);
-    }
-
-    private MavenModuleSet getModuleSet(AbstractBuild<?, ?> build) {
-        if (build instanceof MavenBuild) {
-            MavenBuild m2Build = (MavenBuild) build;
-            MavenModule mm = m2Build.getProject();
-            MavenModuleSet mmSet = mm.getParent();
-            return mmSet;
-        } else if (build instanceof MavenModuleSetBuild) {
-            MavenModuleSetBuild m2moduleSetBuild = (MavenModuleSetBuild) build;
-            MavenModuleSet mmSet = m2moduleSetBuild.getProject();
-            return mmSet;
-        } else {
-            return null;
-        }
     }
 
     @Override
     public DescriptorImpl getDescriptor() {
-        // see Descriptor javadoc for more about what a descriptor is.
         return (DescriptorImpl) super.getDescriptor();
-    }
-
-    private Object readResolve() {
-        LOGGER = Logger.getLogger(BranchBuildWrapper.class.getName());
-        return this;
     }
 
     public String getBranchBasePath() {
@@ -189,8 +166,6 @@ public class BranchBuildWrapper extends BuildWrapper {
 
     @Extension
     public static class DescriptorImpl extends BuildWrapperDescriptor {
-
-        private String numberOfBranchBuildsToKeep = "2";
 
         public DescriptorImpl() {
             super(BranchBuildWrapper.class);
@@ -205,17 +180,6 @@ public class BranchBuildWrapper extends BuildWrapper {
         @Override
         public String getDisplayName() {
             return Messages.Wrapper_DisplayName();
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            numberOfBranchBuildsToKeep = Util.fixEmpty(json.getString("numberOfBranchBuildsToKeep"));
-            save();
-            return true;
-        }
-
-        public String getNumberOfBranchBuildsToKeep() {
-            return numberOfBranchBuildsToKeep;
         }
 
         public List<VersionComputer> getVersioningModes() {

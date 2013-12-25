@@ -23,13 +23,12 @@
  */
 package com.orctom.jenkins.plugin.branch;
 
-import hudson.model.Cause.UserCause;
+import hudson.model.Cause.UserIdCause;
 import hudson.model.Hudson;
 
-public class BranchCause extends UserCause {
+public class BranchCause extends UserIdCause {
 
 	private String authenticationName;
-
 
 	public BranchCause() {
 		this.authenticationName = Hudson.getAuthentication().getName();
