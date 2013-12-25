@@ -33,6 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Copied from org.apache.maven.shared.release.versions.DefaultVersionInfo
+ *
  * This compares and increments versions for a common java versioning scheme.
  * <p/>
  * The supported version scheme has the following parts.<br>
