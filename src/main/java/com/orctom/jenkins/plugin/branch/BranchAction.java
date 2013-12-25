@@ -137,13 +137,16 @@ public class BranchAction implements PermalinkProjectAction {
 
     public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
         Hudson.getInstance().checkPermission(Hudson.ADMINISTER);
+
         BranchBuildWrapper wrapper = project.getBuildWrappersList().get(BranchBuildWrapper.class);
+        final String branchBase = wrapper.getBranchBasePath();
 
         final String branchVersion = req.getParameter("branchVersion");
         final String trunkVersion = req.getParameter("trunkVersion");
         final String branchJobName = req.getParameter("branchJobName");
-        final String branchBase = req.getParameter("branchBase");
         final String branchName = req.getParameter("branchName");
+        final boolean isCreateBranchJob = null != req.getParameter("createBranchJob");
+        final boolean isClearTriggers = null != req.getParameter("clearTriggers");
         final String trunkJobName = project.getName();
 
         BranchArgumentsAction args = new BranchArgumentsAction();
@@ -153,6 +156,8 @@ public class BranchAction implements PermalinkProjectAction {
         args.setBranchBase(branchBase);
         args.setBranchName(branchName);
         args.setTrunkJobName(trunkJobName);
+        args.setCreateBranchJob(isCreateBranchJob);
+        args.setClearTriggers(isClearTriggers);
 
         List<ParameterValue> values = new ArrayList<ParameterValue>();
         values.add(new StringParameterValue("branchVersion", branchVersion));
@@ -161,6 +166,8 @@ public class BranchAction implements PermalinkProjectAction {
         values.add(new StringParameterValue("branchBase", branchBase));
         values.add(new StringParameterValue("branchName", branchName));
         values.add(new StringParameterValue("trunkJobName", trunkJobName));
+        values.add(new StringParameterValue("isCreateBranchJob", isCreateBranchJob ? "true" : "false"));
+        values.add(new StringParameterValue("isClearTriggers", isClearTriggers ? "true" : "false"));
         ParametersAction params = new ParametersAction(values);
 
         if (project.scheduleBuild(0, new BranchCause(), params, args)) {

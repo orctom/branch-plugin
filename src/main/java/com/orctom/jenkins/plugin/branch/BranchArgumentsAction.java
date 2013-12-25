@@ -13,6 +13,8 @@ public class BranchArgumentsAction implements Action {
     private String branchBase;
     private String branchName;
     private String trunkJobName;
+    private boolean isCreateBranchJob;
+    private boolean isClearTriggers;
 
     public String getIconFileName() {
         return null;
@@ -82,4 +84,19 @@ public class BranchArgumentsAction implements Action {
         this.trunkJobName = trunkJobName;
     }
 
+    public boolean isCreateBranchJob() {
+        return isCreateBranchJob;
+    }
+
+    public void setCreateBranchJob(boolean isCreateBranchJob) {
+        this.isCreateBranchJob = isCreateBranchJob;
+    }
+
+    public boolean isClearTriggers() {
+        return isClearTriggers;
+    }
+
+    public void setClearTriggers(boolean isClearTriggers) {
+        this.isClearTriggers = isClearTriggers;
+    }
 }

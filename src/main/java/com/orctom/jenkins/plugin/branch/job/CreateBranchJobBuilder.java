@@ -40,11 +40,13 @@ public class CreateBranchJobBuilder extends Builder {
     private String trunkJobName;
     private String branchJobName;
     private String branchURL;
+    private boolean isClearTriggers;
 
-    public CreateBranchJobBuilder(String trunkJobName, String branchJobName, String branchURL) {
+    public CreateBranchJobBuilder(String trunkJobName, String branchJobName, String branchURL, boolean isClearTriggers) {
         this.trunkJobName = trunkJobName;
         this.branchJobName = branchJobName;
         this.branchURL = branchURL;
+        this.isClearTriggers = isClearTriggers;
     }
 
     @Override
@@ -145,13 +147,15 @@ public class CreateBranchJobBuilder extends Builder {
             }
         }
 
-        // get rid of triggers
-        Node triggerNode = (Node) xpath.compile("//triggers").evaluate(doc, XPathConstants.NODE);
-        NodeList triggers = triggerNode.getChildNodes();
-        if (triggers.getLength() > 0) {
-            for (int i = triggers.getLength() - 1; i >= 0; i--) {
-                Node trigger = triggers.item(i);
-                triggerNode.removeChild(trigger);
+        if (isClearTriggers) {
+            // clear triggers
+            Node triggerNode = (Node) xpath.compile("//triggers").evaluate(doc, XPathConstants.NODE);
+            NodeList triggers = triggerNode.getChildNodes();
+            if (triggers.getLength() > 0) {
+                for (int i = triggers.getLength() - 1; i >= 0; i--) {
+                    Node trigger = triggers.item(i);
+                    triggerNode.removeChild(trigger);
+                }
             }
         }
 

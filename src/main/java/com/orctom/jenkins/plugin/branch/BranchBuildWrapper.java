@@ -52,6 +52,8 @@ public class BranchBuildWrapper extends BuildWrapper {
         final String branchName = args.getBranchName();
         final String branchVersion = args.getBranchVersion();
         final String trunkVersion = args.getTrunkVersion();
+        final boolean isCreateBranchJob = args.isCreateBranchJob();
+        final boolean isClearTriggers = args.isClearTriggers();
 
         buildGoals.append("release:clean release:branch")
                 .append(" -D").append("updateBranchVersions=true")
@@ -111,7 +113,9 @@ public class BranchBuildWrapper extends BuildWrapper {
                         }
                     }
 
-                    new CreateBranchJobBuilder(trunkJobName, branchJobName, branchURL).perform(build, launcher, lstnr);
+                    if (isCreateBranchJob) {
+                        new CreateBranchJobBuilder(trunkJobName, branchJobName, branchURL, isClearTriggers).perform(build, launcher, lstnr);
+                    }
                 }
 
                 return retVal;

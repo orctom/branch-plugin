@@ -1,11 +1,11 @@
 <j:jelly xmlns:j="jelly:core"
-         xmlns:f="/lib/form">
+         xmlns:f="/lib/form"  help="/plugin/branch-plugin/help-branch-base-path.html">
 
-    <f:entry title="Branch base path">
+    <f:entry title="Branch base path" help="/plugin/branch-plugin/help-branch-base-path.html">
         <f:textbox field="branchBasePath" value="${instance.branchBasePath}"/>
     </f:entry>
 
-    <f:entry title="Default versioning mode">
+    <f:entry title="Default versioning mode" help="/plugin/branch-plugin/help-versioning-mode.html">
         <select name="defaultVersioningMode">
             <j:forEach items="${descriptor.versioningModes}" var="mode">
                 <f:option value="${mode.name}" selected="${mode.name == h.defaulted(instance.defaultVersioningMode, 'DEFAULT')}">
