@@ -20,7 +20,7 @@
                     <f:entry title="Next Trunk Version" help="/plugin/branch-plugin/help-trunk-version.html">
                         <f:textbox name="trunkVersion" value="${it.computeTrunkVersion()}" />
                     </f:entry>
-                    <f:optionalBlock name="createBranchJob" title="Create Branch Job" checked="true"  help="/plugin/branch-plugin/help-create-branch-job.html">
+                    <f:optionalBlock name="createBranchJob" title="Create Branch Job" checked="true" help="/plugin/branch-plugin/help-create-branch-job.html">
                         <f:entry title="Branch Job Name" help="/plugin/branch-plugin/help-branch-job-name.html">
                             <f:textbox name="branchJobName" value="${it.computeBranchJobName()}" />
                         </f:entry>

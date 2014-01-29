@@ -1,29 +1,23 @@
 package com.orctom.jenkins.plugin.branch;
 
+import com.orctom.jenkins.plugin.branch.builder.CreateBranchJobBuilder;
+import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.maven.AbstractMavenProject;
 import hudson.maven.MavenModuleSet;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.RunList;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import com.orctom.jenkins.plugin.branch.builder.CreateBranchJobBuilder;
-import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 
 /**
  * Created by CH on 12/11/13.
@@ -62,6 +56,7 @@ public class BranchBuildWrapper extends BuildWrapper {
         final boolean isClearTriggers = args.isClearTriggers();
 
         buildGoals.append("release:clean release:branch")
+                .append(" -D").append("scmCommentPrefix=[branching-plugin]")
                 .append(" -D").append("updateBranchVersions=true")
                 .append(" -D").append("updateWorkingCopyVersions=true")
                 .append(" -D").append("autoVersionSubmodules=true")
@@ -71,6 +66,11 @@ public class BranchBuildWrapper extends BuildWrapper {
                 .append(" -D").append("branchName=").append(branchName)
                 .append(" -D").append("releaseVersion=").append(branchVersion)
                 .append(" -D").append("developmentVersion=").append(trunkVersion);
+
+        if (StringUtils.isNotEmpty(args.getScmUserName()) && StringUtils.isNotEmpty(args.getScmPassword())) {
+            buildGoals.append(" -D").append("username=").append(args.getScmUserName());
+            buildGoals.append(" -D").append("password=").append(args.getScmPassword());
+        }
 
         build.addAction(new BranchArgumentInterceptorAction(buildGoals.toString()));
         build.addAction(new BranchBadgeAction(args.getBranchVersion(), args.getTrunkVersion()));

@@ -7,6 +7,8 @@ import hudson.model.Action;
  */
 public class BranchArgumentsAction implements Action {
 
+    private String scmUserName;
+    private String scmPassword;
     private String branchVersion;
     private String trunkVersion;
     private String branchJobName;
@@ -26,6 +28,22 @@ public class BranchArgumentsAction implements Action {
 
     public String getUrlName() {
         return null;
+    }
+
+    public String getScmUserName() {
+        return scmUserName;
+    }
+
+    public void setScmUserName(String scmUserName) {
+        this.scmUserName = scmUserName;
+    }
+
+    public String getScmPassword() {
+        return scmPassword;
+    }
+
+    public void setScmPassword(String scmPassword) {
+        this.scmPassword = scmPassword;
     }
 
     public String getBranchVersion() {
