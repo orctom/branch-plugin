@@ -9,12 +9,16 @@ public class BranchArgumentsAction implements Action {
 
     private String scmUserName;
     private String scmPassword;
+
     private String branchVersion;
     private String trunkVersion;
+    private String currentVersion;
+
     private String branchJobName;
     private String branchBase;
     private String branchName;
-    private String trunkJobName;
+
+    private String currentJobName;
     private boolean isCreateBranchJob;
     private boolean isClearTriggers;
 
@@ -62,6 +66,14 @@ public class BranchArgumentsAction implements Action {
         this.trunkVersion = trunkVersion;
     }
 
+    public String getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public void setCurrentVersion(String currentVersion) {
+        this.currentVersion = currentVersion;
+    }
+
     public String getBranchJobName() {
         return branchJobName;
     }
@@ -94,12 +106,12 @@ public class BranchArgumentsAction implements Action {
         }
     }
 
-    public String getTrunkJobName() {
-        return trunkJobName;
+    public String getCurrentJobName() {
+        return currentJobName;
     }
 
-    public void setTrunkJobName(String trunkJobName) {
-        this.trunkJobName = trunkJobName;
+    public void setCurrentJobName(String currentJobName) {
+        this.currentJobName = currentJobName;
     }
 
     public boolean isCreateBranchJob() {

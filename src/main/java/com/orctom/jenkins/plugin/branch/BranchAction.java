@@ -1,30 +1,23 @@
 package com.orctom.jenkins.plugin.branch;
 
+import com.orctom.jenkins.plugin.branch.version.RCVersionInfo;
+import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
-import hudson.model.ParameterValue;
-import hudson.model.Hudson;
-import hudson.model.ParametersAction;
-import hudson.model.PermalinkProjectAction;
-import hudson.model.StringParameterValue;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.ServletException;
-
+import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.shared.release.versions.VersionInfo;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-import com.orctom.jenkins.plugin.branch.version.VersionComputer;
-import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author: CH
@@ -77,7 +70,14 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String computeBranchVersion() {
-        String branchVersion = getVersionComputer().getReleaseVersionString();
+        String branchVersion = null;
+        String currentVersion = getCurrentVersion();
+        VersionInfo versionComputer = getVersionComputer();
+        if (versionComputer instanceof RCVersionInfo && isBranch(currentVersion)) {
+            return ((RCVersionInfo)versionComputer).getNextIncrementalVersion().getSnapshotVersionString();
+        }
+
+        branchVersion = versionComputer.getReleaseVersionString();
         if (branchVersion.endsWith(Artifact.SNAPSHOT_VERSION)) {
             return branchVersion;
         } else {
@@ -95,15 +95,21 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String computeBranchJobName() {
-        String selectedVersionMode = getDefaultVersioningMode();
+        VersionInfo versionComputer = getVersionComputer();
 
         StringBuilder jobName = new StringBuilder(50);
-        jobName.append(project.getName().replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d)", ""));
+        jobName.append(project.getName().replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d.*)", ""));
 
-        if (VersionComputer.RELEASE_CANDIDATE.getName().equals(selectedVersionMode)) {
-            String version = getCurrentVersion();
-            if (null != version) {
-                jobName.append("_").append(version.replaceAll("-SNAPSHOT", ""));
+        if (versionComputer instanceof RCVersionInfo) {
+            String newBranchVersion = null;
+            String currentVersion = getCurrentVersion();
+            if (isBranch(currentVersion)) {
+                newBranchVersion = ((RCVersionInfo)versionComputer).getNextIncrementalVersion().getSnapshotVersionString();
+            } else {
+                newBranchVersion = currentVersion;
+            }
+            if (null != newBranchVersion) {
+                jobName.append("_").append(newBranchVersion.replaceAll("^([0-9\\.]+).*", "$1"));
             }
         } else {
             String dateString = df.format(new Date());
@@ -114,16 +120,30 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String computeBranchName() {
-        String selectedVersionMode = getDefaultVersioningMode();
+        VersionInfo versionComputer = getVersionComputer();
 
-        if (VersionComputer.RELEASE_CANDIDATE.getName().equals(selectedVersionMode)) {
-            String version = getCurrentVersion();
-            if (null != version) {
-                return version.replaceAll("-SNAPSHOT", "");
+        if (versionComputer instanceof RCVersionInfo) {
+            String newBranchVersion = null;
+            String currentVersion = getCurrentVersion();
+            if (isBranch(currentVersion)) {
+                newBranchVersion = ((RCVersionInfo)versionComputer).getNextIncrementalVersion().getSnapshotVersionString();
+            } else {
+                newBranchVersion = currentVersion;
+            }
+            if (null != newBranchVersion) {
+                return newBranchVersion.replaceAll("^([0-9\\.]+).*", "$1");
             }
         }
 
         return df.format(new Date());
+    }
+
+    private boolean isBranch(String version) {
+        return version.contains("-RC-") || version.matches("\\d{2}\\.\\d{2}\\.\\d{2}.*");
+    }
+
+    public boolean isTrunk() {
+        return !isBranch(getCurrentVersion());
     }
 
     private String getDefaultVersioningMode() {
@@ -150,29 +170,32 @@ public class BranchAction implements PermalinkProjectAction {
 
         final String branchVersion = req.getParameter("branchVersion");
         final String trunkVersion = req.getParameter("trunkVersion");
+        final String currentVersion = req.getParameter("currentVersion");
         final String branchJobName = req.getParameter("branchJobName");
         final String branchName = req.getParameter("branchName");
         final boolean isCreateBranchJob = null != req.getParameter("createBranchJob");
         final boolean isClearTriggers = null != req.getParameter("clearTriggers");
-        final String trunkJobName = project.getName();
+        final String currentJobName = project.getName();
 
         BranchArgumentsAction args = new BranchArgumentsAction();
         args.setBranchVersion(branchVersion);
         args.setTrunkVersion(trunkVersion);
+        args.setCurrentVersion(currentVersion);
         args.setBranchJobName(branchJobName);
         args.setBranchBase(branchBase);
         args.setBranchName(branchName);
-        args.setTrunkJobName(trunkJobName);
+        args.setCurrentJobName(currentJobName);
         args.setCreateBranchJob(isCreateBranchJob);
         args.setClearTriggers(isClearTriggers);
 
         List<ParameterValue> values = new ArrayList<ParameterValue>();
         values.add(new StringParameterValue("branchVersion", branchVersion));
         values.add(new StringParameterValue("trunkVersion", trunkVersion));
+        values.add(new StringParameterValue("currentVersion", currentVersion));
         values.add(new StringParameterValue("branchJobName", branchJobName));
         values.add(new StringParameterValue("branchBase", branchBase));
         values.add(new StringParameterValue("branchName", branchName));
-        values.add(new StringParameterValue("trunkJobName", trunkJobName));
+        values.add(new StringParameterValue("currentJobName", currentJobName));
         values.add(new StringParameterValue("isCreateBranchJob", isCreateBranchJob ? "true" : "false"));
         values.add(new StringParameterValue("isClearTriggers", isClearTriggers ? "true" : "false"));
         ParametersAction params = new ParametersAction(values);

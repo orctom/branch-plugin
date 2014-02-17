@@ -45,27 +45,33 @@ public class BranchBuildWrapper extends BuildWrapper {
         BranchArgumentsAction args = build.getAction(BranchArgumentsAction.class);
         StringBuilder buildGoals = new StringBuilder();
 
-        final String trunkJobName = args.getTrunkJobName();
+        final String currentJobName = args.getCurrentJobName();
         final String branchJobName = args.getBranchJobName();
         final String branchURL = args.getBranchURL();
         final String branchBase = args.getBranchBase();
         final String branchName = args.getBranchName();
         final String branchVersion = args.getBranchVersion();
         final String trunkVersion = args.getTrunkVersion();
+        final String currentVersion = args.getCurrentVersion();
         final boolean isCreateBranchJob = args.isCreateBranchJob();
         final boolean isClearTriggers = args.isClearTriggers();
+
+        final boolean isBranchingFromTrunk = !currentVersion.contains("-RC-")
+                && !currentVersion.matches("\\d{2}\\.\\d{2}\\.\\d{2}.*");
 
         buildGoals.append("release:clean release:branch")
                 .append(" -D").append("scmCommentPrefix=[branching-plugin]")
                 .append(" -D").append("updateBranchVersions=true")
-                .append(" -D").append("updateWorkingCopyVersions=true")
                 .append(" -D").append("autoVersionSubmodules=true")
                 .append(" -D").append("remoteTagging=false")
                 .append(" -D").append("suppressCommitBeforeBranch=true")
                 .append(" -D").append("branchBase=").append(branchBase)
                 .append(" -D").append("branchName=").append(branchName)
                 .append(" -D").append("releaseVersion=").append(branchVersion)
-                .append(" -D").append("developmentVersion=").append(trunkVersion);
+                .append(" -D").append("updateWorkingCopyVersions=").append(isBranchingFromTrunk);
+        if (isBranchingFromTrunk) {
+            buildGoals.append(" -D").append("developmentVersion=").append(trunkVersion);
+        }
 
         if (StringUtils.isNotEmpty(args.getScmUserName()) && StringUtils.isNotEmpty(args.getScmPassword())) {
             buildGoals.append(" -D").append("username=").append(args.getScmUserName());
@@ -73,7 +79,7 @@ public class BranchBuildWrapper extends BuildWrapper {
         }
 
         build.addAction(new BranchArgumentInterceptorAction(buildGoals.toString()));
-        build.addAction(new BranchBadgeAction(args.getBranchVersion(), args.getTrunkVersion()));
+        build.addAction(new BranchBadgeAction(args.getBranchVersion(), args.getCurrentVersion()));
 
         return new Environment() {
 
@@ -110,7 +116,7 @@ public class BranchBuildWrapper extends BuildWrapper {
                     }
 
                     if (isCreateBranchJob) {
-                        new CreateBranchJobBuilder(trunkJobName, branchJobName, branchURL, isClearTriggers).perform(build, launcher, lstnr);
+                        new CreateBranchJobBuilder(currentJobName, branchJobName, branchURL, isClearTriggers).perform(build, launcher, lstnr);
                     }
                 }
 

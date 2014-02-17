@@ -6,22 +6,27 @@
                     <f:entry title="Current Version">
 						${it.getCurrentVersion()}
 					</f:entry>
-                    <f:entry title="Branch Base">
+                    <f:invisibleEntry>
+                        <f:textbox name="currentVersion" value="${it.getCurrentVersion()}"/>
+                    </f:invisibleEntry>
+                    <f:entry title="Branch Base Path">
                         ${it.getBranchBase()}
                     </f:entry>
                 </f:section>
                 <f:section title="Create a New Branch">
-                    <f:entry title="Branch Name" help="/plugin/branch-plugin/help-branch-name.html">
+                    <f:entry title="SCM Folder Name" help="/plugin/branch-plugin/help-branch-name.html">
                         <f:textbox name="branchName" value="${it.computeBranchName()}"/>
                     </f:entry>
-                    <f:entry title="Branch Version" help="/plugin/branch-plugin/help-branch-version.html">
+                    <f:entry title="Version of New Branch" help="/plugin/branch-plugin/help-branch-version.html">
                         <f:textbox name="branchVersion" value="${it.computeBranchVersion()}" />
                     </f:entry>
+                    <j:if test="${it.isTrunk()}">
                     <f:entry title="Next Trunk Version" help="/plugin/branch-plugin/help-trunk-version.html">
                         <f:textbox name="trunkVersion" value="${it.computeTrunkVersion()}" />
                     </f:entry>
-                    <f:optionalBlock name="createBranchJob" title="Create Branch Job" checked="true" help="/plugin/branch-plugin/help-create-branch-job.html">
-                        <f:entry title="Branch Job Name" help="/plugin/branch-plugin/help-branch-job-name.html">
+                    </j:if>
+                    <f:optionalBlock name="createBranchJob" title="Create Job for New Branch" checked="true" help="/plugin/branch-plugin/help-create-branch-job.html">
+                        <f:entry title="Job Name" help="/plugin/branch-plugin/help-branch-job-name.html">
                             <f:textbox name="branchJobName" value="${it.computeBranchJobName()}" />
                         </f:entry>
                         <f:entry title="Clear Triggers" help="/plugin/branch-plugin/help-clear-triggers.html">

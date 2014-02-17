@@ -156,16 +156,16 @@ public class CreateBranchJobBuilder extends Builder {
         }
 
         // get rid of branch-plugin it's self
-        Node buildWrapperNode = (Node) xpath.compile("//buildWrappers").evaluate(doc, XPathConstants.NODE);
-        NodeList buildWrappers = buildWrapperNode.getChildNodes();
-        if (buildWrappers.getLength() > 0) {
-            for (int i = buildWrappers.getLength() - 1; i >= 0; i--) {
-                Node buildWrapper = buildWrappers.item(i);
-                if ("com.orctom.jenkins.plugin.branch.BranchBuildWrapper".equals(buildWrapper.getNodeName())) {
-                    buildWrapperNode.removeChild(buildWrapper);
-                }
-            }
-        }
+//        Node buildWrapperNode = (Node) xpath.compile("//buildWrappers").evaluate(doc, XPathConstants.NODE);
+//        NodeList buildWrappers = buildWrapperNode.getChildNodes();
+//        if (buildWrappers.getLength() > 0) {
+//            for (int i = buildWrappers.getLength() - 1; i >= 0; i--) {
+//                Node buildWrapper = buildWrappers.item(i);
+//                if ("com.orctom.jenkins.plugin.branch.BranchBuildWrapper".equals(buildWrapper.getNodeName())) {
+//                    buildWrapperNode.removeChild(buildWrapper);
+//                }
+//            }
+//        }
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");

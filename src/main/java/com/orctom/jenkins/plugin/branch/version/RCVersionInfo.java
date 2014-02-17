@@ -49,6 +49,26 @@ public class RCVersionInfo extends DefaultVersionInfo {
         return version;
     }
 
+    public VersionInfo getNextIncrementalVersion() {
+        DefaultVersionInfo version = null;
+        if (digits != null) {
+            List digits = new ArrayList(this.digits);
+            String annotationRevision = this.annotationRevision;
+            if (StringUtils.isNumeric(annotationRevision)) {
+                annotationRevision = incrementVersionString(annotationRevision);
+            } else {
+                if (digits.size() <= 2) {
+                    digits.add("1");
+                } else {
+                    digits.set( digits.size() - 1, incrementVersionString( (String) digits.get( digits.size() - 1 ) ) );
+                }
+            }
+
+            version = new DefaultVersionInfo(digits, annotation, annotationRevision, buildSpecifier, annotationSeparator, annotationRevSeparator, buildSeparator);
+        }
+        return version;
+    }
+
     @Override
     public String getSnapshotVersionString() {
         if (Artifact.SNAPSHOT_VERSION.equals(strVersion)) {
@@ -68,10 +88,7 @@ public class RCVersionInfo extends DefaultVersionInfo {
             return "1.0-RC-SNAPSHOT";
         }
 
-        if (!strVersion.endsWith(Artifact.SNAPSHOT_VERSION)) {
-            return strVersion + "-RC-SNAPSHOT";
-        } else {
-            return strVersion.replaceAll("-SNAPSHOT", "-RC-SNAPSHOT");
-        }
+        return strVersion.replaceAll("^([0-9\\.]+).*", "$1") + "-RC-SNAPSHOT";
+
     }
 }
