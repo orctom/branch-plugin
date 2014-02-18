@@ -168,9 +168,10 @@ public class BranchAction implements PermalinkProjectAction {
         BranchBuildWrapper wrapper = project.getBuildWrappersList().get(BranchBuildWrapper.class);
         final String branchBase = wrapper.getBranchBasePath();
 
-        final String branchVersion = req.getParameter("branchVersion");
-        final String trunkVersion = req.getParameter("trunkVersion");
         final String currentVersion = req.getParameter("currentVersion");
+        final boolean isBranch = isBranch(currentVersion);
+
+        final String branchVersion = req.getParameter("branchVersion");
         final String branchJobName = req.getParameter("branchJobName");
         final String branchName = req.getParameter("branchName");
         final boolean isCreateBranchJob = null != req.getParameter("createBranchJob");
@@ -179,7 +180,6 @@ public class BranchAction implements PermalinkProjectAction {
 
         BranchArgumentsAction args = new BranchArgumentsAction();
         args.setBranchVersion(branchVersion);
-        args.setTrunkVersion(trunkVersion);
         args.setCurrentVersion(currentVersion);
         args.setBranchJobName(branchJobName);
         args.setBranchBase(branchBase);
@@ -190,7 +190,6 @@ public class BranchAction implements PermalinkProjectAction {
 
         List<ParameterValue> values = new ArrayList<ParameterValue>();
         values.add(new StringParameterValue("branchVersion", branchVersion));
-        values.add(new StringParameterValue("trunkVersion", trunkVersion));
         values.add(new StringParameterValue("currentVersion", currentVersion));
         values.add(new StringParameterValue("branchJobName", branchJobName));
         values.add(new StringParameterValue("branchBase", branchBase));
@@ -198,6 +197,13 @@ public class BranchAction implements PermalinkProjectAction {
         values.add(new StringParameterValue("currentJobName", currentJobName));
         values.add(new StringParameterValue("isCreateBranchJob", isCreateBranchJob ? "true" : "false"));
         values.add(new StringParameterValue("isClearTriggers", isClearTriggers ? "true" : "false"));
+
+        if (!isBranch) {
+            final String trunkVersion = req.getParameter("trunkVersion");
+            args.setTrunkVersion(trunkVersion);
+            values.add(new StringParameterValue("trunkVersion", trunkVersion));
+        }
+
         ParametersAction params = new ParametersAction(values);
 
         if (project.scheduleBuild(0, new BranchCause(), params, args)) {
