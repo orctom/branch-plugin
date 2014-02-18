@@ -1,13 +1,11 @@
 package com.orctom.jenkins.plugin.branch;
 
-import com.orctom.jenkins.plugin.branch.version.RCVersionInfo;
+import com.orctom.jenkins.plugin.branch.version.VersionComputer;
 import com.orctom.jenkins.plugin.branch.version.VersionComputerFactory;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
 import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.shared.release.versions.VersionInfo;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -16,7 +14,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,72 +67,39 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String computeBranchVersion() {
-        String branchVersion = null;
-        String currentVersion = getCurrentVersion();
-        VersionInfo versionComputer = getVersionComputer();
-        if (versionComputer instanceof RCVersionInfo && isBranch(currentVersion)) {
-            return ((RCVersionInfo)versionComputer).getNextIncrementalVersion().getSnapshotVersionString();
-        }
-
-        branchVersion = versionComputer.getReleaseVersionString();
-        if (branchVersion.endsWith(Artifact.SNAPSHOT_VERSION)) {
-            return branchVersion;
+        VersionComputer versionComputer = getVersionComputer();
+        if (versionComputer.isTrunk()) {
+            return versionComputer.getReleaseVersion();
         } else {
-            return branchVersion + "-SNAPSHOT";
+            return versionComputer.getNextIncrementalVersion().getReleaseVersion();
         }
     }
 
     public String computeTrunkVersion() {
-        VersionInfo nextVersion = getVersionComputer().getNextVersion();
-        if (null == nextVersion) {
-            return "NaN-SNAPSHOT";
-        } else {
-            return nextVersion.getSnapshotVersionString();
-        }
+        return getVersionComputer().getNextVersion().getSnapshotVersion();
     }
 
     public String computeBranchJobName() {
-        VersionInfo versionComputer = getVersionComputer();
-
         StringBuilder jobName = new StringBuilder(50);
         jobName.append(project.getName().replaceAll("(?i)TRUNK", "BRANCH").replaceAll("([_-]?\\d.*)", ""));
 
-        if (versionComputer instanceof RCVersionInfo) {
-            String newBranchVersion = null;
-            String currentVersion = getCurrentVersion();
-            if (isBranch(currentVersion)) {
-                newBranchVersion = ((RCVersionInfo)versionComputer).getNextIncrementalVersion().getSnapshotVersionString();
-            } else {
-                newBranchVersion = currentVersion;
-            }
-            if (null != newBranchVersion) {
-                jobName.append("_").append(newBranchVersion.replaceAll("^([0-9\\.]+).*", "$1"));
-            }
+        VersionComputer versionComputer = getVersionComputer();
+        if (versionComputer.isTrunk()) {
+            jobName.append("_").append(versionComputer.getReleaseVersionDigits());
         } else {
-            String dateString = df.format(new Date());
-            jobName.append("_").append(dateString);
+            jobName.append("_").append(versionComputer.getNextIncrementalVersion().getReleaseVersionDigits());
         }
 
         return jobName.toString();
     }
 
     public String computeBranchName() {
-        VersionInfo versionComputer = getVersionComputer();
-
-        if (versionComputer instanceof RCVersionInfo) {
-            String newBranchVersion = null;
-            String currentVersion = getCurrentVersion();
-            if (isBranch(currentVersion)) {
-                newBranchVersion = ((RCVersionInfo)versionComputer).getNextIncrementalVersion().getSnapshotVersionString();
-            } else {
-                newBranchVersion = currentVersion;
-            }
-            if (null != newBranchVersion) {
-                return newBranchVersion.replaceAll("^([0-9\\.]+).*", "$1");
-            }
+        VersionComputer versionComputer = getVersionComputer();
+        if (versionComputer.isTrunk()) {
+            return versionComputer.getReleaseVersionDigits();
+        } else {
+            return versionComputer.getNextIncrementalVersion().getReleaseVersionDigits();
         }
-
-        return df.format(new Date());
     }
 
     private boolean isBranch(String version) {
@@ -151,7 +115,7 @@ public class BranchAction implements PermalinkProjectAction {
         return buildWrapper.getDefaultVersioningMode();
     }
 
-    private VersionInfo getVersionComputer() {
+    private VersionComputer getVersionComputer() {
         String currentVersion = "NaN-SNAPSHOT";
         final MavenModule rootModule = getRootModule();
         if (rootModule != null && StringUtils.isNotBlank(rootModule.getVersion())) {

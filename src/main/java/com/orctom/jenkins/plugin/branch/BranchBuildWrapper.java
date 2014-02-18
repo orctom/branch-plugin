@@ -1,7 +1,7 @@
 package com.orctom.jenkins.plugin.branch;
 
 import com.orctom.jenkins.plugin.branch.builder.CreateBranchJobBuilder;
-import com.orctom.jenkins.plugin.branch.version.VersionComputer;
+import com.orctom.jenkins.plugin.branch.version.VersionComputers;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.maven.AbstractMavenProject;
@@ -188,8 +188,8 @@ public class BranchBuildWrapper extends BuildWrapper {
             return Messages.Wrapper_DisplayName();
         }
 
-        public List<VersionComputer> getVersioningModes() {
-            return new ArrayList<VersionComputer>(Arrays.asList(VersionComputer.values()));
+        public List<VersionComputers> getVersioningModes() {
+            return new ArrayList<VersionComputers>(Arrays.asList(VersionComputers.values()));
         }
     }
 }
