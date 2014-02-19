@@ -30,7 +30,9 @@ public abstract class AbstractVersionComputer implements VersionComputer {
     }
 
     public boolean isTrunk() {
-        return !rawVersion.contains("-RC-") && UBUNTU_VERSION_PATTERN.matcher(rawVersion).matches();
+        return !rawVersion.contains("-RC-")
+                && !UBUNTU_VERSION_PATTERN.matcher(rawVersion).matches()
+                && rawVersion.endsWith("SNAPSHOT");
     }
 
     public String getReleaseVersionDigits() {
