@@ -32,6 +32,9 @@
                         <f:entry title="Clear Triggers" help="/plugin/branch-plugin/help-clear-triggers.html">
                             <f:checkbox name="clearTriggers" checked="true" />
                         </f:entry>
+						<f:entry title="Clear Downstream" help="/plugin/branch-plugin/help-clear-downstream.html">
+							<f:checkbox name="clearDownstream" checked="true" />
+						</f:entry>
                     </f:optionalBlock>
                 </f:section>
 

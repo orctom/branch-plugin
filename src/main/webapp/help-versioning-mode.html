@@ -1,10 +1,10 @@
 <div>
     <ul>
         <li>Default: Increase the micro version</li>
-        <li>Release Candidate: Add <tt>RC</tt> before <tt>-SNAPSHOT</tt>, making it <tt>x.x.x-RC-SNAPSHOT</tt></li>
-        <li>Ubuntu like Monthly: yy.MM.dd for branch; yy.MM+1 for new trunk</li>
+        <li>-RC-SNAPSHOT: Add <tt>RC</tt> before <tt>-SNAPSHOT</tt>, making it <tt>x.x.x-RC-SNAPSHOT</tt></li>
+        <li>trunk: yy.MM-SNAPSHOT, branch: yy.MM.dd-SNAPSHOT: yy.MM.dd for branch; yy.MM+1 for new trunk</li>
         <li>
-            Ubuntu like Monthly with Job Name/ID: Same as <tt>Ubuntu like Monthly</tt>,<br/>
+            trunk: yy.MM-SNAPSHOT, branch: yy.MM.dd-${first world in Job name}-SNAPSHOT:<br/>
             added trunk job name (before the first underscore "_") to the branch job name,<br/>
             e.g. trunk job name is <tt>ABC_TRUNK</tt>, the newly created branch job will be: <tt>ABC_BRANCH_${branch-version}</tt>
         </li>

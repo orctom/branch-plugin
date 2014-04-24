@@ -7,9 +7,10 @@ package com.orctom.jenkins.plugin.branch.version;
 public enum VersionComputers {
 
     DEFAULT("DEFAULT", "Default", DefaultVersionComputer.class),
-    RELEASE_CANDIDATE("RELEASE_CANDIDATE", "Release Candidate", RCVersionComputer.class),
-    MONTHLY("MONTHLY", "Ubuntu like Monthly", DateVersionComputer.class),
-    MONTHLY_WITH_JOB_ID("MONTHLY_WITH_JOB_ID", "Ubuntu like Monthly with Job Name/ID", DateWithJobIDVersionComputer.class);
+    RELEASE_CANDIDATE("RELEASE_CANDIDATE", "x.x.x-RC-SNAPSHOT", RCVersionComputer.class),
+    MONTHLY("MONTHLY", "trunk: yy.MM-SNAPSHOT, branch: yy.MM.dd-SNAPSHOT", DateVersionComputer.class),
+    MONTHLY_WITH_JOB_ID("MONTHLY_WITH_JOB_ID", "trunk: yy.MM-SNAPSHOT, branch: yy.MM.dd-${first world in Job name}-SNAPSHOT", DateWithJobIDVersionComputer.class),
+    MONTHLY_WITH_JOB_ID_STATIC_TRUNK("MONTHLY_WITH_JOB_ID_STATIC_TRUNK", "trunk: no change, branch: yy.MM.dd-${first world in Job name}-SNAPSHOT", DateWithJobIDVersionComputer.class);
 
     private String name;
     private String description;

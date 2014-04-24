@@ -21,6 +21,7 @@ public class BranchArgumentsAction implements Action {
     private String currentJobName;
     private boolean isCreateBranchJob;
     private boolean isClearTriggers;
+    private boolean isClearDownstream;
 
     public String getIconFileName() {
         return null;
@@ -128,5 +129,13 @@ public class BranchArgumentsAction implements Action {
 
     public void setClearTriggers(boolean isClearTriggers) {
         this.isClearTriggers = isClearTriggers;
+    }
+
+    public boolean isClearDownstream() {
+        return isClearDownstream;
+    }
+
+    public void setClearDownstream(boolean isClearDownstream) {
+        this.isClearDownstream = isClearDownstream;
     }
 }

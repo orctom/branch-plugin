@@ -41,12 +41,14 @@ public class CreateBranchJobBuilder extends Builder {
     private String branchJobName;
     private String branchURL;
     private boolean isClearTriggers;
+    private boolean isClearDownstream;
 
-    public CreateBranchJobBuilder(String trunkJobName, String branchJobName, String branchURL, boolean isClearTriggers) {
+    public CreateBranchJobBuilder(String trunkJobName, String branchJobName, String branchURL, boolean isClearTriggers, boolean isClearDownstream) {
         this.trunkJobName = trunkJobName;
         this.branchJobName = branchJobName;
         this.branchURL = branchURL;
         this.isClearTriggers = isClearTriggers;
+        this.isClearDownstream = isClearDownstream;
     }
 
     @Override
@@ -152,6 +154,14 @@ public class CreateBranchJobBuilder extends Builder {
                     Node trigger = triggers.item(i);
                     triggerNode.removeChild(trigger);
                 }
+            }
+        }
+
+        // clear downstream
+        if (isClearDownstream) {
+            Node downstreamTriggerNode = (Node) xpath.compile("//publishers/hudson.tasks.BuildTrigger").evaluate(doc, XPathConstants.NODE);
+            if (null != downstreamTriggerNode) {
+                downstreamTriggerNode.getParentNode().removeChild(downstreamTriggerNode);
             }
         }
 

@@ -140,6 +140,7 @@ public class BranchAction implements PermalinkProjectAction {
         final String branchName = req.getParameter("branchName");
         final boolean isCreateBranchJob = null != req.getParameter("createBranchJob");
         final boolean isClearTriggers = null != req.getParameter("clearTriggers");
+        final boolean isClearDownstream = null != req.getParameter("clearDownstream");
         final String currentJobName = project.getName();
 
         BranchArgumentsAction args = new BranchArgumentsAction();
@@ -151,6 +152,7 @@ public class BranchAction implements PermalinkProjectAction {
         args.setCurrentJobName(currentJobName);
         args.setCreateBranchJob(isCreateBranchJob);
         args.setClearTriggers(isClearTriggers);
+        args.setClearDownstream(isClearDownstream);
 
         List<ParameterValue> values = new ArrayList<ParameterValue>();
         values.add(new StringParameterValue("branchVersion", branchVersion));
@@ -161,6 +163,7 @@ public class BranchAction implements PermalinkProjectAction {
         values.add(new StringParameterValue("currentJobName", currentJobName));
         values.add(new StringParameterValue("isCreateBranchJob", isCreateBranchJob ? "true" : "false"));
         values.add(new StringParameterValue("isClearTriggers", isClearTriggers ? "true" : "false"));
+        values.add(new StringParameterValue("isClearDownstream", isClearDownstream ? "true" : "false"));
 
         if (!isBranch) {
             final String trunkVersion = req.getParameter("trunkVersion");

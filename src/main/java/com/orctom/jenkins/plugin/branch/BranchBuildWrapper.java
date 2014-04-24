@@ -55,6 +55,7 @@ public class BranchBuildWrapper extends BuildWrapper {
         final String currentVersion = args.getCurrentVersion();
         final boolean isCreateBranchJob = args.isCreateBranchJob();
         final boolean isClearTriggers = args.isClearTriggers();
+        final boolean isClearDownstream = args.isClearDownstream();
 
         final boolean isBranchingFromTrunk = !currentVersion.contains("-RC-")
                 && !currentVersion.matches("\\d{2}\\.\\d{2}\\.\\d{2}.*");
@@ -116,7 +117,7 @@ public class BranchBuildWrapper extends BuildWrapper {
                     }
 
                     if (isCreateBranchJob) {
-                        new CreateBranchJobBuilder(currentJobName, branchJobName, branchURL, isClearTriggers).perform(build, launcher, lstnr);
+                        new CreateBranchJobBuilder(currentJobName, branchJobName, branchURL, isClearTriggers, isClearDownstream).perform(build, launcher, lstnr);
                     }
                 }
 
