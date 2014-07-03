@@ -31,7 +31,7 @@ public class BranchAction implements PermalinkProjectAction {
     }
 
     public String getIconFileName() {
-        return "/plugin/branch-plugin/img/branch.gif";
+        return "/plugin/branch/img/branch.gif";
     }
 
     public String getDisplayName() {

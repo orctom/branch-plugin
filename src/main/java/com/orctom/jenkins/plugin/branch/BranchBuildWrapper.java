@@ -5,12 +5,14 @@ import com.orctom.jenkins.plugin.branch.version.VersionComputers;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.maven.AbstractMavenProject;
+import hudson.maven.MavenBuild;
+import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
 import hudson.model.*;
-import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
+import hudson.tasks.*;
 import hudson.util.RunList;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.scm.manager.ScmManager;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -119,6 +121,9 @@ public class BranchBuildWrapper extends BuildWrapper {
                     if (isCreateBranchJob) {
                         new CreateBranchJobBuilder(currentJobName, branchJobName, branchURL, isClearTriggers, isClearDownstream).perform(build, launcher, lstnr);
                     }
+                } else {
+                    BuildStep cleanerStep = new Maven("release:clean", null);
+                    cleanerStep.perform(build, launcher, listener);
                 }
 
                 return retVal;

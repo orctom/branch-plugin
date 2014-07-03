@@ -2,5 +2,5 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  Prepare Jenkins for restart
+  Create SCM Branch, change the pom version, and a new branch job as well.
 </div>
